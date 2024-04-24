@@ -1,26 +1,29 @@
-% Define the coefficient matrix A
-A = [2, -1, 0, 0;
-     -1, 2, -1, 0;
-     0, -1, 2, -1;
-     0, 0, -1, 2];
+% Define system parameters
+m = [12000; 10000; 8000]; % Masses in kg
+k = [3000; 2400; 18000]; % Spring constants in N/m
 
-% Compute the eigenvalues and eigenvectors of A
-[V, D] = eig(A);
+% Forming the mass and stiffness matrices
+M = diag(m);
+K = [k(1)+k(2), -k(2), 0; -k(2), k(2)+k(3), -k(3); 0, -k(3), k(3)];
 
-% Extract the diagonal matrix of eigenvalues
-lambda = diag(D);
+% Solve the eigenvalue problem
+[eigenvectors, eigenvalues] = eig(K, M);
 
-% Define the right-hand side vector b
-b = [500; 0; 0; 100];
+% Display eigenvalues
+disp('Eigenvalues:');
+disp(diag(eigenvalues));
 
-% Initialize the solution vector x
-x = zeros(size(b));
+% Normalize eigenvectors so that the translation of the third floor is one
+eigenvectors = eigenvectors ./ eigenvectors(3,:);
 
-% Solve for each component of x
-for i = 1:length(lambda)
-    x = x + (V(:,i)' * b / lambda(i)) * V(:,i);
+% Plot modes of vibration
+figure;
+for i = 1:size(eigenvectors, 2)
+    subplot(size(eigenvectors, 2), 1, i);
+    plot(1:3, eigenvectors(:, i), 'o-', 'LineWidth', 1.5);
+    title(['Mode ', num2str(i)]);
+    xlabel('Floor');
+    ylabel('Amplitude');
+    grid on;
 end
 
-% Display the solution
-disp('Solution x:');
-disp(x);
